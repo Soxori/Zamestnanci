@@ -3,7 +3,7 @@ let surnames = ["Novák", "Novotný", "Svoboda", "Svobodová", "Nováková", "Dv
 
 // input data for generator
 const dtoIn = {
-    count: 2,
+    count: 5,
     age: {
       min: 19,
       max: 35
@@ -25,7 +25,7 @@ function main(dataInput) {
     console.log(summary(dtoOut));
     return dtoOut;
 }
-console.log(main(dtoIn));
+main(dtoIn);
 
 // function for sorting employees by workload
 function summary(listOfEmployees) {
@@ -53,8 +53,19 @@ function summary(listOfEmployees) {
     birthdate = new Date(listOfEmployees[i].birthdate);
     averageAge += new Date().getFullYear() - birthdate.getFullYear();
   }
-  averageAge = Math.round(averageAge / amountOfEmployees);
 
+  //get average workload of employees with gender female 
+  let averageWomenWorkload = 0;
+  let amountOfWomen = 0;
+  for (let i = 0; i < amountOfEmployees; i++) {
+      if(listOfEmployees[i].gender === "Female") {
+      averageWomenWorkload += listOfEmployees[i].workload;
+      amountOfWomen++;
+    }
+  }
+  averageWomenWorkload = Math.floor(averageWomenWorkload / amountOfWomen);
+
+  averageAge = Math.round((averageAge / amountOfEmployees) * 10) / 10;
   // get minimum and maximum age of employees
   let maxAge = new Date(listOfEmployees[0].birthdate);
   let minAge = new Date(listOfEmployees[0].birthdate);
@@ -71,32 +82,26 @@ function summary(listOfEmployees) {
 
   //get median age of employees
   let medianAge = 0;
-  let sortedListOfEmployees = listOfEmployees.sort((a, b) => new Date(a.birthdate) - new Date(b.birthdate));
+  let sortedBirthdate = listOfEmployees.sort((a, b) => new Date(a.birthdate) - new Date(b.birthdate));
   if (amountOfEmployees % 2 === 0) {
-    let firstMiddle = new Date(sortedListOfEmployees[amountOfEmployees / 2 - 1].birthdate);
-    let secondMiddle = new Date(sortedListOfEmployees[amountOfEmployees / 2].birthdate);
+    let firstMiddle = new Date(sortedBirthdate[amountOfEmployees / 2 - 1].birthdate);
+    let secondMiddle = new Date(sortedBirthdate[amountOfEmployees / 2].birthdate);
     medianAge = Math.round((firstMiddle.getFullYear() + secondMiddle.getFullYear()) / 2);
   } else {
-    medianAge = new Date(sortedListOfEmployees[Math.floor(amountOfEmployees / 2)].birthdate).getFullYear();
+    medianAge = new Date(sortedBirthdate[Math.floor(amountOfEmployees / 2)].birthdate).getFullYear();
   }
   medianAge = new Date().getFullYear() - medianAge;
+
   // get median workload of employees
   let medianWorkload = 0;
+  let sortedWorkload = listOfEmployees.sort((a, b) => a.workload - b.workload);
   if (amountOfEmployees % 2 === 0) {
-    let firstMiddle = sortedListOfEmployees[amountOfEmployees / 2 - 1].workload;
-    let secondMiddle = sortedListOfEmployees[amountOfEmployees / 2].workload;
+    let firstMiddle = sortedWorkload[amountOfEmployees / 2 - 1].workload;
+    let secondMiddle = sortedWorkload[amountOfEmployees / 2].workload;
     medianWorkload = Math.round((firstMiddle + secondMiddle) / 2);
   } else {
-    medianWorkload = sortedListOfEmployees[Math.floor(amountOfEmployees / 2)].workload;
+    medianWorkload = sortedWorkload[Math.floor(amountOfEmployees / 2)].workload;
   }
-  //get average workload of employees
-  let averageWomenWorkload = 0;
-  for (let i = 0; i < amountOfEmployees; i++) {
-      if(listOfEmployees[i].gender === "Female") {
-      averageWomenWorkload += listOfEmployees[i].workload;
-    }
-  }
-  averageWomenWorkload = averageWomenWorkload / amountOfEmployees;
 
   const summaryArray = [];
   summaryArray.push({
@@ -111,9 +116,8 @@ function summary(listOfEmployees) {
     medianAge: medianAge,
     medianWorkload: medianWorkload,
     averageWomenWorkload: averageWomenWorkload,
-  });
-  //TODO: sort by workload
-  return sortedArray;
+  }, sortedWorkload);
+  return summaryArray;
 }
 
 // functions for generating random names, surnames, ages, workloads and gender of employees
